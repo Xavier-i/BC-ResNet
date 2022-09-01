@@ -53,7 +53,7 @@ def train_command(scale, batch_size, device, epoch, log_interval, checkpoint_fil
         num_workers = 1
         pin_memory = True
     else:
-        num_workers = 0
+        num_workers = 8
         pin_memory = False
 
     print(f"Device: {device}")
@@ -154,7 +154,7 @@ def test_command(model_file, scale, batch_size, device, dropout, subspectral_nor
         num_workers=num_workers,
         pin_memory=pin_memory
     )
-    test_score = apply.apply(model, test_loader, device)
+    test_score = apply.compute_accuracy(model, test_loader, device)
     print(f"Test accuracy: {test_score}")
 
 
@@ -162,7 +162,7 @@ def test_command(model_file, scale, batch_size, device, dropout, subspectral_nor
 @click.option("--model-file", type=str, help="path to model weights")
 @click.option("--wav-file", type=str, help="path to wav sound file")
 @click.option("--scale", type=int, default=1, help="model width will be multiplied by scale")
-@click.option("--device", type=str, default=util.get_device(), help="`cuda` or `cpu`")
+@click.option("--device", type=str, default=util.get_device(), help="`cuda` or `cpu` or `mps`")
 @click.option("--dropout", type=float, default=0.1, help="dropout")
 @click.option("--subspectral-norm/--dropout-norm", type=bool, default=True, help="use SubspectralNorm or Dropout")
 def apply_command(model_file, wav_file, scale, device, dropout, subspectral_norm):

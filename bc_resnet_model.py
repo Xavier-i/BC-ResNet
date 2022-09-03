@@ -40,7 +40,8 @@ class NormalBlock(nn.Module):
             norm_layer,
         )
         self.f1 = nn.Sequential(
-            Conv2dSamePadding(in_channels=n_chan, out_channels=n_chan, kernel_size=(1, 3), groups=n_chan, dilation=(1, dilation)),
+            Conv2dSamePadding(in_channels=n_chan, out_channels=n_chan, kernel_size=(1, 3), groups=n_chan,
+                              dilation=(1, dilation)),
             nn.BatchNorm2d(n_chan),
             nn.SiLU(),
             nn.Conv2d(n_chan, n_chan, kernel_size=1),
@@ -80,7 +81,8 @@ class TransitionBlock(nn.Module):
         )
 
         self.f1 = nn.Sequential(
-            Conv2dSamePadding(in_channels=out_chan, out_channels=out_chan, kernel_size=(1, 3), groups=out_chan, dilation=(1, dilation)),
+            Conv2dSamePadding(in_channels=out_chan, out_channels=out_chan, kernel_size=(1, 3), groups=out_chan,
+                              dilation=(1, dilation)),
             nn.BatchNorm2d(out_chan),
             nn.SiLU(),
             nn.Conv2d(out_chan, out_chan, kernel_size=1),

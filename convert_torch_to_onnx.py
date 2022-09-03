@@ -1,5 +1,4 @@
 #from onnxruntime.quantization.quantize import quantize
-from transformers import Wav2Vec2ForSequenceClassification
 import torch
 import argparse
 
@@ -16,7 +15,6 @@ def convert_to_onnx(model_file, onnx_model_name):
     )
     model.load_state_dict(torch.load(model_file))
     model.eval()
-    audio_len = 160000
 
     x = torch.randn(1, 1, 40, 32)
 
@@ -24,11 +22,14 @@ def convert_to_onnx(model_file, onnx_model_name):
                       x,  # model input (or a tuple for multiple inputs)
                       onnx_model_name,  # where to save the model (can be a file or file-like object)
                       export_params=True,  # store the trained parameter weights inside the model file
-                      opset_version=11,     # the ONNX version to export the model to
+                      #opset_version=11,     # the ONNX version to export the model to
                       do_constant_folding=True,  # whether to execute constant folding for optimization
                       input_names=['input'],  # the model's input names
                       output_names=['output'],  # the model's output names
+                      dynamic_axes={'input': [3],  # variable length axes
+                                    }
                       )
+
 
 
 def quantize_onnx_model(onnx_model_path, quantized_model_path):
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="model-sc-2.pt",
+        default="model-sc-2-test.pt",
         help="Model HuggingFace ID or path that will converted to ONNX",
     )
     parser.add_argument(

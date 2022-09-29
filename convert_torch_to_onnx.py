@@ -58,7 +58,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     model_id_or_path = args.model
-    onnx_model_name = model_id_or_path.split("/")[-1] + ".onnx"
+    onnx_model_name = "aha.onnx"#model_id_or_path.split("/")[-1] + ".onnx"
     print("model_id_or_path", model_id_or_path)
     print("onnx_model_name", onnx_model_name)
     convert_to_onnx(model_id_or_path, onnx_model_name)

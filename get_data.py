@@ -59,6 +59,7 @@ def prepare_wav(waveform, sample_rate):
         waveform = resampler(waveform)
     to_mel = transforms.MelSpectrogram(sample_rate=SAMPLE_RATE, n_fft=1024, f_max=8000, n_mels=40)
     log_mel = (to_mel(waveform) + EPS).log2()
+    print("here is the size!!!!!!",log_mel.size())
     return log_mel
 
 

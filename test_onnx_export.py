@@ -10,6 +10,7 @@ onnx_file_name = "model-sc-2-test.pt.onnx"
 # Load the ONNX model
 ort_session = ort.InferenceSession(onnx_file_name)
 test_tensor = np.random.randn(1, 1, 40, 32).astype(np.float32)
+
 outputs = ort_session.run(
     None,
     {"input": test_tensor},

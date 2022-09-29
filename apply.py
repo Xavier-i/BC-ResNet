@@ -2,7 +2,6 @@ import torch
 import get_data
 import numpy as np
 import torchaudio
-#import onnxruntime as ort
 
 
 def number_of_correct(pred, target):
@@ -19,16 +18,16 @@ def compute_accuracy(model, data_loader, device):
     for data, target in data_loader:
         data = data.to(device)
         target = target.to(device)
-        #mps_data = data.to("mps")
-        #mps_target = target.to("mps")
+        # mps_data = data.to("mps")
+        # mps_target = target.to("mps")
 
         model_pred = model(data)
-        #mps_model_pred = model(mps_data)
+        # mps_model_pred = model(mps_data)
 
         pred = get_likely_index(model_pred)
-        #mps_pred = get_likely_index(mps_model_pred)
+        # mps_pred = get_likely_index(mps_model_pred)
 
-        #print("pred: ", pred, " target:", target)
+        # print("pred: ", pred, " target:", target)
 
         correct += number_of_correct(pred, target)
 
@@ -39,32 +38,43 @@ def compute_accuracy(model, data_loader, device):
 def apply_to_wav(model, waveform: torch.Tensor, sample_rate: float, device: str):
     model.eval()
     mel_spec = get_data.prepare_wav(waveform, sample_rate)
-    #print(mel_spec.size())
+    # print(mel_spec.size())
     mel_spec = torch.unsqueeze(mel_spec, dim=0).to(device)
-    #print(mel_spec.size())
-    #print(model)
+    # print(mel_spec.size())
+    # print(model)
     res = model(mel_spec)
 
-##
-    #onnx_file_name = "model-sc-2-test.pt.onnx"
-    # Load the ONNX model
-    #ort_session = ort.InferenceSession(onnx_file_name)
-    #print("wtf!!!!!")
-    #print(mel_spec.detach().cpu().numpy())
-    #outputs = ort_session.run(
-    #    None,
-    #    {"input": mel_spec.numpy()},
-    #)
-    #res = torch.tensor(outputs).squeeze()
+    run_ort = True
+    ort_res = None
+    if run_ort :
+        import onnxruntime as ort
 
-    #print("res1", res1, res1.size())
-    #print("res2", res, res.size())
+        onnx_file_name = "model-sc-2-test.pt.onnx"
+        # Load the ONNX model
+        ort_session = ort.InferenceSession(onnx_file_name)
+        # print(mel_spec.detach().cpu().numpy())
+        outputs = ort_session.run(
+            None,
+            {"input": mel_spec.numpy()},
+        )
+        ort_res = torch.tensor(outputs).squeeze()
+
+    # print("res1", res1, res1.size())
+    # print("res2", res, res.size())
+
     probs = torch.nn.Softmax(dim=-1)(res).cpu().detach().numpy()
     predictions = []
     for idx in np.argsort(-probs):
         label = get_data.idx_to_label(idx)
         predictions.append((label, probs[idx]))
-    return predictions
+    if run_ort:
+        ort_probs = torch.nn.Softmax(dim=-1)(ort_res).cpu().detach().numpy()
+        ort_predictions = []
+        for idx in np.argsort(-ort_probs):
+            label = get_data.idx_to_label(idx)
+            ort_predictions.append((label, ort_probs[idx]))
+        return predictions, ort_predictions
+    return predictions, []
 
 
 def apply_to_file(model, wav_file: str, device: str):

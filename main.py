@@ -180,9 +180,14 @@ def apply_command(model_file, wav_file, scale, device, dropout, subspectral_norm
     model.load_state_dict(torch.load(model_file))
     model.eval()
 
-    predictions = apply.apply_to_file(model, wav_file, device)
+    predictions, ort_predictions = apply.apply_to_file(model, wav_file, device)
     for label, prob in predictions[:5]:
         print(f"{label}\t{prob:.5f}")
+
+    if len(ort_predictions) > 0:
+        print("aha! ort!")
+        for label, prob in ort_predictions[:5]:
+            print(f"{label}\t{prob:.5f}")
 
 
 if __name__ == "__main__":
